@@ -141,3 +141,13 @@
         @apply bg-background text-foreground;
     }
 }
+/* Make date picker icon visible */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7); /* makes the white icon darker */
+}
+
+/* Make time picker icon visible */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+}
+

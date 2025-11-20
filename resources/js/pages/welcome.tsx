@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { login, register } from '@/routes';
 import { type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 
 const destinations = ['India', 'United States', 'France', 'Germany'];
 
@@ -9,51 +9,63 @@ const featuredPackages = [
     {
         id: 1,
         title: 'Dubai Dreamscape',
+        destination: 'Dubai, United Arab Emirates',
         description:
             'Discover the glamour of Dubai with skyscraper views, desert safaris, and luxurious experiences.',
-        price: '$1,800.00',
+        priceLabel: '$1,800.00',
+        budget: 1800,
         rating: 4.5,
         image: 'https://images.pexels.com/photos/325193/pexels-photo-325193.jpeg?auto=compress&cs=tinysrgb&w=800',
     },
     {
         id: 2,
         title: 'Bali Bliss Retreat',
+        destination: 'Bali, Indonesia',
         description:
             'Immerse yourself in tropical serenity, terraced rice fields, and Balinese cultural wonders.',
-        price: '$3,000.00',
+        priceLabel: '$3,000.00',
+        budget: 3000,
         rating: 5,
         image: 'https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?auto=compress&cs=tinysrgb&w=800',
     },
     {
         id: 3,
         title: 'Mauritius Marvel',
+        destination: 'Mauritius',
         description:
             'White-sand beaches, turquoise waters, and romantic sunsets for the ultimate island escape.',
-        price: '$2,500.00',
+        priceLabel: '$2,500.00',
+        budget: 2500,
         rating: 4.5,
         image: 'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=800',
     },
     {
         id: 4,
         title: 'USA Explorer',
+        destination: 'United States',
         description: 'From New York skylines to canyon vistas, build the ultimate American road trip.',
-        price: '$2,200.00',
+        priceLabel: '$2,200.00',
+        budget: 2200,
         rating: 4.3,
         image: 'https://images.pexels.com/photos/325185/pexels-photo-325185.jpeg?auto=compress&cs=tinysrgb&w=800',
     },
     {
         id: 5,
         title: 'Miami Sun & Sea Escape',
+        destination: 'Miami, United States',
         description: 'Vibrant nightlife, Art Deco charm, and beach days soaked in sunshine on Miami Beach.',
-        price: '$1,450.00',
+        priceLabel: '$1,450.00',
+        budget: 1450,
         rating: 4.4,
         image: 'https://images.pexels.com/photos/208701/pexels-photo-208701.jpeg?auto=compress&cs=tinysrgb&w=800',
     },
     {
         id: 6,
         title: 'Agra Heritage Journey',
+        destination: 'Agra, India',
         description: 'Witness the Taj Mahal at dawn and wander through centuries of Mughal architecture.',
-        price: '$1,100.00',
+        priceLabel: '$1,100.00',
+        budget: 1100,
         rating: 4.6,
         image: 'https://images.pexels.com/photos/460376/pexels-photo-460376.jpeg?auto=compress&cs=tinysrgb&w=800',
     },
@@ -63,6 +75,24 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
     const {
         auth: { user },
     } = usePage<SharedData>().props;
+
+    // Always go to /trips/create.
+    // If user is a guest, auth middleware will:
+    //  - redirect to login
+    //  - then redirect back to /trips/create after login.
+    const goToCreateTrip = () => {
+        router.get('/trips/create');
+    };
+
+    // Go to /trips/create with prefilled data.
+    // Same behavior: guests get sent to login first, then back with params.
+    const bookPackage = (pkg: (typeof featuredPackages)[number]) => {
+        router.get('/trips/create', {
+            title: pkg.title,
+            destination: pkg.destination,
+            budget: pkg.budget,
+        });
+    };
 
     return (
         <>
@@ -89,9 +119,16 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             <Link href="/" className="transition hover:text-sky-600">
                                 Home
                             </Link>
-                            <Link href="/" className="transition hover:text-sky-600">
+
+                            {/* Book → Create Trip (auth middleware will handle login redirect if guest) */}
+                            <button
+                                type="button"
+                                onClick={goToCreateTrip}
+                                className="transition hover:text-sky-600"
+                            >
                                 Book
-                            </Link>
+                            </button>
+
                             <div className="group relative">
                                 <button className="inline-flex items-center gap-1 transition hover:text-sky-600">
                                     Packages
@@ -127,35 +164,36 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
                         <div className="flex items-center gap-3 text-sm">
                             {user ? (
-                            <Link
+                                <Link
                                     href="/dashboard"
                                     className="rounded-full border border-sky-200 px-4 py-1.5 font-semibold text-sky-700 transition hover:bg-sky-50"
-                            >
-                                Dashboard
-                            </Link>
-                        ) : (
-                            <>
-                                <Link
-                                    href={login()}
-                                        className="rounded-full px-4 py-1.5 font-semibold text-slate-600 transition hover:text-sky-600"
                                 >
-                                        Sign In
+                                    Dashboard
                                 </Link>
-                                {canRegister && (
+                            ) : (
+                                <>
                                     <Link
-                                        href={register()}
-                                            className="rounded-full bg-sky-600 px-5 py-1.5 font-semibold text-white shadow-sm transition hover:bg-sky-500"
+                                        href={login()}
+                                        className="rounded-full px-4 py-1.5 font-semibold text-slate-600 transition hover:text-sky-600"
                                     >
-                                        Register
+                                        Sign In
                                     </Link>
-                                )}
-                            </>
-                        )}
+                                    {canRegister && (
+                                        <Link
+                                            href={register()}
+                                            className="rounded-full bg-sky-600 px-5 py-1.5 font-semibold text-white shadow-sm transition hover:bg-sky-500"
+                                        >
+                                            Register
+                                        </Link>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
                 </header>
 
                 <main>
+                    {/* Hero section */}
                     <section className="relative overflow-hidden bg-slate-900 text-white">
                         <div className="absolute inset-0">
                             <img
@@ -173,7 +211,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 </p>
                                 <h1 className="text-4xl font-black tracking-tight text-white sm:text-5xl">
                                     Voyage Mate
-                            </h1>
+                                </h1>
                                 <p className="text-base text-slate-200">
                                     Voyage Mate is a travel app designed to simplify the booking of tourism
                                     packages, offering a seamless experience from planning to reservation.
@@ -182,7 +220,13 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                     <span>Visit:</span>
                                     <span className="text-2xl text-sky-200">Fiji</span>
                                 </div>
-                                <Button size="lg" className="bg-sky-500 px-8 text-white hover:bg-sky-400">
+
+                                {/* Hero Book Now → Create Trip (auth will force login if needed) */}
+                                <Button
+                                    size="lg"
+                                    className="bg-sky-500 px-8 text-white hover:bg-sky-400"
+                                    onClick={goToCreateTrip}
+                                >
                                     Book Now
                                 </Button>
                             </div>
@@ -200,14 +244,15 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                             >
                                                 {place}
                                                 <span className="text-sky-200">Top pick</span>
-                                </li>
+                                            </li>
                                         ))}
-                            </ul>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </section>
 
+                    {/* Handpicked packages */}
                     <section className="mx-auto max-w-6xl px-6 py-16">
                         <div className="mb-8 text-center">
                             <h2 className="text-3xl font-bold text-slate-900">Handpicked Packages</h2>
@@ -229,16 +274,24 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                     <div className="flex flex-1 flex-col gap-3 p-6">
                                         <div>
                                             <h3 className="text-xl font-semibold text-slate-900">{pkg.title}</h3>
+                                            <p className="mt-1 text-xs font-medium text-slate-500">
+                                                {pkg.destination}
+                                            </p>
                                             <p className="mt-2 text-sm text-slate-600">{pkg.description}</p>
                                         </div>
                                         <div className="mt-auto flex items-center justify-between text-sm font-semibold text-slate-900">
-                                            <span>{pkg.price}</span>
+                                            <span>{pkg.priceLabel}</span>
                                             <span className="flex items-center gap-1 text-amber-500">
                                                 {'★'.repeat(Math.floor(pkg.rating))}
                                                 <span className="text-slate-500">({pkg.rating.toFixed(1)})</span>
                                             </span>
                                         </div>
-                                        <Button className="mt-2 bg-sky-500 text-white hover:bg-sky-400">
+
+                                        {/* Package Book Now → /trips/create with prefilled title/destination/budget */}
+                                        <Button
+                                            className="mt-2 bg-sky-500 text-white hover:bg-sky-400"
+                                            onClick={() => bookPackage(pkg)}
+                                        >
                                             Book Now
                                         </Button>
                                     </div>
@@ -246,9 +299,8 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             ))}
                         </div>
                     </section>
-                    </main>
+                </main>
             </div>
         </>
     );
 }
-

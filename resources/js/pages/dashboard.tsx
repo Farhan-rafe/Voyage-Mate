@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -12,12 +12,14 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+// Demo trips for "Popular Trip Ideas" (still static, but Book Now can prefill create form)
 const demoTrips = [
     {
         id: 1,
         title: 'Dubai Dreamscape',
         location: 'Dubai, United Arab Emirates',
         price: '$1,800.00',
+        budget: 1800,
         rating: 4.5,
         image: 'https://images.pexels.com/photos/325193/pexels-photo-325193.jpeg?auto=compress&cs=tinysrgb&w=800',
     },
@@ -26,6 +28,7 @@ const demoTrips = [
         title: 'Bali Bliss Retreat',
         location: 'Bali, Indonesia',
         price: '$3,000.00',
+        budget: 3000,
         rating: 5,
         image: 'https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?auto=compress&cs=tinysrgb&w=800',
     },
@@ -34,12 +37,45 @@ const demoTrips = [
         title: 'Mauritius Marvel',
         location: 'Mauritius',
         price: '$2,500.00',
+        budget: 2500,
         rating: 4.5,
         image: 'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=800',
     },
 ];
 
+// Type of the extra data we expect from Laravel
+type DashboardStats = {
+    activeTrips: number;
+    totalTrips: number;
+    upcomingTrip: {
+        title: string;
+        destination: string;
+        start_date: string;
+        days_until: number;
+    } | null;
+    usedBudgetPercent: number;
+    favoritesCount: number;
+    upcomingThisMonthCount: number;
+};
+
+type PageProps = {
+    dashboardStats: DashboardStats;
+};
+
 export default function Dashboard() {
+    const { dashboardStats } = usePage<PageProps>().props;
+    const { activeTrips, totalTrips, upcomingTrip, usedBudgetPercent, favoritesCount, upcomingThisMonthCount } =
+        dashboardStats;
+
+    // When user clicks a demo card's "Book Now"
+    const bookTrip = (trip: (typeof demoTrips)[number]) => {
+        router.get('/trips/create', {
+            title: trip.title,
+            destination: trip.location, // use location as destination
+            budget: trip.budget,
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -63,13 +99,21 @@ export default function Dashboard() {
                             </p>
 
                             <div className="flex flex-wrap items-center gap-3 pt-1">
-                                <Button size="lg" className="bg-white px-6 text-sky-700 hover:bg-sky-50">
+                                {/* Create New Trip → blank create form */}
+                                <Button
+                                    size="lg"
+                                    className="bg-white px-6 text-sky-700 hover:bg-sky-50"
+                                    onClick={() => router.get('/trips/create')}
+                                >
                                     Create New Trip
                                 </Button>
+
+                                {/* View All Trips → trips index */}
                                 <Button
                                     size="lg"
                                     variant="outline"
                                     className="border-sky-100/70 bg-white/10 text-sky-50 hover:bg-white/15"
+                                    onClick={() => router.get('/trips')}
                                 >
                                     View All Trips
                                 </Button>
@@ -77,32 +121,50 @@ export default function Dashboard() {
                         </div>
 
                         <div className="grid w-full max-w-xs grid-cols-2 gap-3 rounded-2xl bg-white/10 p-4 text-xs backdrop-blur md:max-w-sm">
+                            {/* Active Trips */}
                             <div className="rounded-xl bg-sky-500/90 p-3 shadow-sm">
                                 <p className="text-[0.65rem] uppercase tracking-wide text-sky-100/90">
                                     Active Trips
                                 </p>
-                                <p className="mt-1 text-2xl font-bold">4</p>
-                                <p className="mt-1 text-[0.7rem] text-sky-100/90">Currently planned</p>
+                                <p className="mt-1 text-2xl font-bold">{activeTrips}</p>
+                                <p className="mt-1 text-[0.7rem] text-sky-100/90">Trips you&apos;ve created</p>
                             </div>
+
+                            {/* Upcoming Destination */}
                             <div className="rounded-xl bg-indigo-500/90 p-3 shadow-sm">
                                 <p className="text-[0.65rem] uppercase tracking-wide text-indigo-100/90">
                                     Upcoming Destination
                                 </p>
-                                <p className="mt-1 text-sm font-semibold">Mauritius</p>
-                                <p className="mt-1 text-[0.7rem] text-indigo-100/90">5 days to departure</p>
+                                <p className="mt-1 text-sm font-semibold">
+                                    {upcomingTrip ? upcomingTrip.destination ?? upcomingTrip.title : 'No upcoming trip'}
+                                </p>
+                                <p className="mt-1 text-[0.7rem] text-indigo-100/90">
+                                    {upcomingTrip
+                                        ? `${upcomingTrip.days_until} days to departure`
+                                        : 'Plan your next getaway'}
+                                </p>
                             </div>
+
+                            {/* Budget Used */}
                             <div className="rounded-xl bg-purple-500/90 p-3 shadow-sm">
                                 <p className="text-[0.65rem] uppercase tracking-wide text-purple-100/90">
                                     Budget Used
                                 </p>
-                                <p className="mt-1 text-2xl font-bold">62%</p>
-                                <p className="mt-1 text-[0.7rem] text-purple-100/90">Across all trips</p>
+                                <p className="mt-1 text-2xl font-bold">
+                                    {usedBudgetPercent}
+                                    <span className="text-base align-top">%</span>
+                                </p>
+                                <p className="mt-1 text-[0.7rem] text-purple-100/90">
+                                    Based on all trips & expenses
+                                </p>
                             </div>
+
+                            {/* Favorites */}
                             <div className="rounded-xl bg-emerald-500/90 p-3 shadow-sm">
                                 <p className="text-[0.65rem] uppercase tracking-wide text-emerald-100/90">
                                     Favorites
                                 </p>
-                                <p className="mt-1 text-2xl font-bold">9</p>
+                                <p className="mt-1 text-2xl font-bold">{favoritesCount}</p>
                                 <p className="mt-1 text-[0.7rem] text-emerald-100/90">Saved destinations</p>
                             </div>
                         </div>
@@ -156,7 +218,11 @@ export default function Dashboard() {
                                     </div>
                                 </CardContent>
                                 <CardContent className="pb-4">
-                                    <Button className="w-full bg-sky-500 text-xs text-white hover:bg-sky-400">
+                                    {/* Book Now → /trips/create with prefilled values */}
+                                    <Button
+                                        className="w-full bg-sky-500 text-xs text-white hover:bg-sky-400"
+                                        onClick={() => bookTrip(trip)}
+                                    >
                                         Book Now
                                     </Button>
                                 </CardContent>
@@ -223,13 +289,13 @@ export default function Dashboard() {
                                 <span className="text-[0.7rem] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
                                     Total Trips
                                 </span>
-                                <span className="text-sm font-bold">12</span>
+                                <span className="text-sm font-bold">{totalTrips}</span>
                             </div>
                             <div className="flex items-center justify-between rounded-lg bg-white/60 p-3 text-slate-800 shadow-sm dark:bg-slate-900/60 dark:text-slate-50">
                                 <span className="text-[0.7rem] font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
                                     Upcoming This Month
                                 </span>
-                                <span className="text-sm font-bold">3</span>
+                                <span className="text-sm font-bold">{upcomingThisMonthCount}</span>
                             </div>
                             <div className="rounded-lg bg-white/60 p-3 text-slate-800 shadow-sm dark:bg-slate-900/60 dark:text-slate-50">
                                 <p className="text-[0.7rem] font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-300">
