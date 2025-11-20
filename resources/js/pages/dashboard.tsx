@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -156,9 +156,11 @@ export default function Dashboard() {
                                     </div>
                                 </CardContent>
                                 <CardContent className="pb-4">
-                                    <Button className="w-full bg-sky-500 text-xs text-white hover:bg-sky-400">
-                                        Book Now
-                                    </Button>
+                                    <Link href="/destinations" className="inline-block">
+                                        <Button className="w-full bg-sky-500 text-xs text-white hover:bg-sky-400">
+                                            Book Now
+                                        </Button>
+                                    </Link>
                                 </CardContent>
                             </Card>
                         ))}

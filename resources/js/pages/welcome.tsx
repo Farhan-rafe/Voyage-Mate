@@ -182,9 +182,11 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                     <span>Visit:</span>
                                     <span className="text-2xl text-sky-200">Fiji</span>
                                 </div>
-                                <Button size="lg" className="bg-sky-500 px-8 text-white hover:bg-sky-400">
-                                    Book Now
-                                </Button>
+                                <Link href="/destinations" className="inline-block">
+                                    <Button size="lg" className="bg-sky-500 px-8 text-white hover:bg-sky-400">
+                                        Book Now
+                                    </Button>
+                                </Link>
                             </div>
 
                             <div className="hidden w-80 md:block">
@@ -238,9 +240,11 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                                 <span className="text-slate-500">({pkg.rating.toFixed(1)})</span>
                                             </span>
                                         </div>
-                                        <Button className="mt-2 bg-sky-500 text-white hover:bg-sky-400">
-                                            Book Now
-                                        </Button>
+                                        <Link href="/destinations" className="inline-block">
+                                            <Button className="mt-2 bg-sky-500 text-white hover:bg-sky-400">
+                                                Book Now
+                                            </Button>
+                                        </Link>
                                     </div>
                                 </div>
                             ))}
