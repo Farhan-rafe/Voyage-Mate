@@ -5,24 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ItineraryItem extends Model
+class ChecklistItem extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'trip_id',
-        'date',
-        'time',
+        'type',
         'title',
-        'location',
-        'notes',
         'is_done',
+        'due_date',
     ];
 
     protected $casts = [
-        'date' => 'date',
-        'time' => 'datetime:H:i',
         'is_done' => 'boolean',
+        'due_date' => 'date',
     ];
 
     public function trip()

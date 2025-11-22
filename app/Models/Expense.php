@@ -5,24 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ItineraryItem extends Model
+class Expense extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'trip_id',
-        'date',
-        'time',
-        'title',
-        'location',
+        'category',
+        'amount',
+        'spent_on',
         'notes',
-        'is_done',
     ];
 
     protected $casts = [
-        'date' => 'date',
-        'time' => 'datetime:H:i',
-        'is_done' => 'boolean',
+        'amount'   => 'decimal:2',
+        'spent_on' => 'date',
     ];
 
     public function trip()

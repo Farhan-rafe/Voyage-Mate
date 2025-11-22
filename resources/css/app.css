@@ -141,3 +141,37 @@
         @apply bg-background text-foreground;
     }
 }
+/* Make date picker icon visible */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7); /* makes the white icon darker */
+}
+
+/* Make time picker icon visible */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #38bdf8, #6366f1);
+    border-radius: 8px;
+}
+
+/* Glow animation */
+@keyframes pulse-glow {
+    0% { opacity: 0.8; box-shadow: 0 0 8px #38bdf8; }
+    50% { opacity: 1; box-shadow: 0 0 18px #6366f1; }
+    100% { opacity: 0.8; box-shadow: 0 0 8px #38bdf8; }
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s infinite ease-in-out;
+}
