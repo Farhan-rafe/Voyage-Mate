@@ -12,8 +12,12 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
 
-// Show destination search on root so features are accessible from '/'
-Route::get('/', [DestinationController::class, 'index'])->name('home');
+// Root page — welcome landing
+Route::get('/', function () {
+    return Inertia::render('welcome', [
+        'canRegister' => Features::enabled(Features::registration()),
+    ]);
+})->name('home');
 
 
 // Destination search and details
