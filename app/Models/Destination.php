@@ -21,6 +21,16 @@ class Destination extends Model
         'travel_tips',
         'latitude',
         'longitude',
+        'best_time_to_visit',
+        'nearest_airport',
+        'local_transport',
+        'must_see_attractions',
+        'safety_tips',
+        'history_culture',
+        'entry_fees',
+        'photo_gallery_1',
+        'photo_gallery_2',
+        'photo_gallery_3',
     ];
 
     /**
