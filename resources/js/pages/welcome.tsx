@@ -77,13 +77,22 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
     } = usePage<SharedData>().props;
 
     const goToCreateTrip = () => {
-        // Take users to the destination search so they can explore packages
-        router.get('/destinations');
+        // Take users to trip creation (team feature)
+        router.get('/trips/create');
     };
 
     const bookPackage = (pkg: (typeof featuredPackages)[number]) => {
-        // Prefill the destination search with the package title to help discovery
-        router.get('/destinations', { search: pkg.title });
+        // Prefill trip creation with package details
+        router.get('/trips/create', {
+            title: pkg.title,
+            destination: pkg.destination,
+            budget: pkg.budget,
+        });
+    };
+
+    const exploreDestinations = () => {
+        // Go to destination search (your feature)
+        router.get('/destinations');
     };
 
     return (
@@ -119,6 +128,12 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 className="transition hover:text-sky-600"
                             >
                                 Book
+                            </button>
+                            <button
+                                onClick={exploreDestinations}
+                                className="transition hover:text-sky-600"
+                            >
+                                Explore Destinations
                             </button>
                             <a href="#packages" className="transition hover:text-sky-600">Packages</a>
                             <a href="#services" className="transition hover:text-sky-600">Services</a>
