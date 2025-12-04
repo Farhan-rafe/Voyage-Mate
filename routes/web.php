@@ -23,6 +23,8 @@ Route::get('/destinations/{id}', [\App\Http\Controllers\DestinationController::c
 
 // Reviews (only for authenticated users)
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/destinations/{destination}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
+    
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::get('/trips', [TripController::class, 'index'])->name('trips.index');

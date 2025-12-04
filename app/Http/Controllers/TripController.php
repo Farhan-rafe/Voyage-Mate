@@ -47,6 +47,15 @@ class TripController extends Controller
 
         $data['user_id'] = Auth::id();
 
+        // Ensure compatibility with existing SQLite schema that uses
+        // `name` and `details` columns instead of `title`/`description`.
+        if (! array_key_exists('name', $data) && array_key_exists('title', $data)) {
+            $data['name'] = $data['title'];
+        }
+        if (! array_key_exists('details', $data) && array_key_exists('description', $data)) {
+            $data['details'] = $data['description'];
+        }
+
         Trip::create($data);
 
         return redirect()->route('trips.index')->with('success', 'Trip created.');
@@ -86,6 +95,14 @@ class TripController extends Controller
             'description' => 'nullable|string',
             'budget'      => 'nullable|numeric|min:0',
         ]);
+
+        // Ensure compatibility with existing SQLite schema
+        if (! array_key_exists('name', $data) && array_key_exists('title', $data)) {
+            $data['name'] = $data['title'];
+        }
+        if (! array_key_exists('details', $data) && array_key_exists('description', $data)) {
+            $data['details'] = $data['description'];
+        }
 
         $trip->update($data);
 

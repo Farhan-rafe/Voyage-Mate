@@ -20,6 +20,9 @@ class Trip extends Model
         'start_date',
         'end_date',
         'description',
+        // legacy columns (kept for SQLite/dev DB compatibility)
+        'name',
+        'details',
         'budget',
     ];
 

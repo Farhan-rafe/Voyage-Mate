@@ -76,16 +76,14 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
         auth: { user },
     } = usePage<SharedData>().props;
 
+    // Route 'Book' to the destinations search so users can search/book packages
     const goToCreateTrip = () => {
-        router.get('/trips/create');
+        router.get('/destinations');
     };
 
     const bookPackage = (pkg: (typeof featuredPackages)[number]) => {
-        router.get('/trips/create', {
-            title: pkg.title,
-            destination: pkg.destination,
-            budget: pkg.budget,
-        });
+        // Open the search page pre-filled with the package destination
+        router.get('/destinations', { search: pkg.destination });
     };
 
     return (
