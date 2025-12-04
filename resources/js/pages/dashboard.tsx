@@ -154,13 +154,9 @@ export default function Dashboard() {
         activeTrips + totalTrips + upcomingThisMonthCount + usedBudgetPercent;
     const mood = moodOptions[moodIndexBase % moodOptions.length];
 
-    // When user clicks a demo card's "Book Now"
+    // When user clicks a demo card's "Book Now" → go to destination search
     const bookTrip = (trip: (typeof demoTrips)[number]) => {
-        router.get("/trips/create", {
-            title: trip.title,
-            destination: trip.location,
-            budget: trip.budget,
-        });
+        router.get("/destinations");
     };
 
     return (
