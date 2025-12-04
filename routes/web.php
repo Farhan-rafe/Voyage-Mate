@@ -5,16 +5,15 @@ use App\Http\Controllers\ItineraryItemController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ChecklistItemController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DestinationController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
 
-Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
-})->name('home');
+// Show destination search on root so features are accessible from '/'
+Route::get('/', [DestinationController::class, 'index'])->name('home');
 
 
 // Destination search and details
@@ -61,6 +60,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('checklist-items.toggle');
     Route::delete('/checklist-items/{item}', [ChecklistItemController::class, 'destroy'])
         ->name('checklist-items.destroy');
+
+    // Reviews for destinations
+    Route::post('/destinations/{destination}/reviews', [ReviewController::class, 'store'])
+        ->name('reviews.store');
 });
 
 require __DIR__.'/settings.php';
