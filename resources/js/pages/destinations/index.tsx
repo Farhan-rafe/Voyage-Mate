@@ -1,7 +1,9 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import React from 'react';
+import AppLayout from '@/layouts/app-layout';
 
 export default function DestinationIndex({ destinations, filters }) {
+    DestinationIndex.layout = (page) => <AppLayout title="Explore Destinations">{page}</AppLayout>;
     const [search, setSearch] = React.useState(filters.search || '');
     const [type, setType] = React.useState(filters.type || '');
     const [country, setCountry] = React.useState(filters.country || '');

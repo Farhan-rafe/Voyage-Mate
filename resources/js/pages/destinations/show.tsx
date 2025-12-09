@@ -1,8 +1,10 @@
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import { MapPin, Clock, Plane, Bus, AlertCircle, History, DollarSign, Camera, Star, Heart, Cloud, Droplets, Wind } from 'lucide-react';
+import AppLayout from '@/layouts/app-layout';
 
 export default function DestinationShow({ destination }) {
+    DestinationShow.layout = (page) => <AppLayout title={`${destination.name}`}>{page}</AppLayout>;
     const { auth } = usePage().props;
     const galleryImages = [destination.photo_gallery_1, destination.photo_gallery_2, destination.photo_gallery_3].filter(Boolean);
     const [isFavorited, setIsFavorited] = useState(false);
