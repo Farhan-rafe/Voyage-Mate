@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { MapPin, Clock, Plane, Bus, AlertCircle, History, DollarSign, Camera, Star, Heart, Cloud, Droplets, Wind } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
@@ -37,16 +38,11 @@ export default function DestinationShow({ destination }) {
         }
 
         try {
-            const response = await fetch(`/destinations/${destination.id}/favorite`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
-                },
-            });
-            const data = await response.json();
-            setIsFavorited(data.is_favorited);
+            const response = await axios.post(`/destinations/${destination.id}/favorite`);
+            setIsFavorited(response.data.is_favorited);
         } catch (error) {
             console.error('Error toggling favorite:', error);
+            alert('Failed to save favorite. Please try again.');
         }
     };
 
