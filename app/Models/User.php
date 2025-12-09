@@ -59,4 +59,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class);
     }
+
+    /**
+     * Get the favorite destinations for the user.
+     */
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    /**
+     * Get all favorited destinations for the user.
+     */
+    public function favoritedDestinations()
+    {
+        return $this->belongsToMany(Destination::class, 'favorites');
+    }
 }

@@ -1,9 +1,52 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import React from 'react';
-import { MapPin, Clock, Plane, Bus, AlertCircle, History, DollarSign, Camera, Star } from 'lucide-react';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { MapPin, Clock, Plane, Bus, AlertCircle, History, DollarSign, Camera, Star, Heart, Cloud, Droplets, Wind } from 'lucide-react';
 
 export default function DestinationShow({ destination }) {
+    const { auth } = usePage().props;
     const galleryImages = [destination.photo_gallery_1, destination.photo_gallery_2, destination.photo_gallery_3].filter(Boolean);
+    const [isFavorited, setIsFavorited] = useState(false);
+    const [weather, setWeather] = useState(null);
+    const [loadingWeather, setLoadingWeather] = useState(false);
+
+    useEffect(() => {
+        // Check if favorited
+        if (auth.user) {
+            fetch(`/favorites/check/${destination.id}`)
+                .then(res => res.json())
+                .then(data => setIsFavorited(data.is_favorited));
+        }
+
+        // Get weather
+        setLoadingWeather(true);
+        fetch(`/api/weather/${destination.id}`)
+            .then(res => res.json())
+            .then(data => {
+                setWeather(data);
+                setLoadingWeather(false);
+            })
+            .catch(() => setLoadingWeather(false));
+    }, [destination.id, auth.user]);
+
+    const toggleFavorite = async () => {
+        if (!auth.user) {
+            router.visit('/login');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/destinations/${destination.id}/favorite`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                },
+            });
+            const data = await response.json();
+            setIsFavorited(data.is_favorited);
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+        }
+    };
 
     return (
         <div className="bg-gradient-to-b from-sky-50 to-white min-h-screen">
@@ -11,17 +54,71 @@ export default function DestinationShow({ destination }) {
             
             {/* Header Section */}
             <div className="max-w-5xl mx-auto px-6 py-8">
-                <div className="mb-6">
-                    <h1 className="text-4xl font-bold text-slate-900 mb-2">{destination.name}</h1>
-                    <div className="flex items-center gap-4 text-slate-600">
-                        <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {destination.city}, {destination.country}</span>
-                        <span className="px-3 py-1 bg-sky-100 text-sky-700 rounded-full text-sm font-medium capitalize">{destination.type}</span>
+                <div className="mb-6 flex items-start justify-between">
+                    <div>
+                        <h1 className="text-4xl font-bold text-slate-900 mb-2">{destination.name}</h1>
+                        <div className="flex items-center gap-4 text-slate-600">
+                            <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {destination.city}, {destination.country}</span>
+                            <span className="px-3 py-1 bg-sky-100 text-sky-700 rounded-full text-sm font-medium capitalize">{destination.type}</span>
+                        </div>
                     </div>
+                    {auth.user && (
+                        <button
+                            onClick={toggleFavorite}
+                            className={`p-3 rounded-full transition-all ${
+                                isFavorited
+                                    ? 'bg-red-100 text-red-600'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600'
+                            }`}
+                            title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                        >
+                            <Heart className="w-6 h-6" fill={isFavorited ? 'currentColor' : 'none'} />
+                        </button>
+                    )}
                 </div>
 
                 {/* Featured Image */}
                 {destination.featured_image && (
                     <img src={destination.featured_image} alt={destination.name} className="w-full h-96 object-cover rounded-2xl shadow-lg mb-8" />
+                )}
+
+                {/* Weather Widget */}
+                {loadingWeather ? (
+                    <div className="bg-white rounded-xl shadow-md p-6 mb-8 animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                        <div className="h-10 bg-gray-200 rounded w-1/3"></div>
+                    </div>
+                ) : weather && (
+                    <div className="bg-gradient-to-r from-sky-400 to-blue-500 rounded-xl shadow-lg p-6 mb-8 text-white">
+                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                            <Cloud className="w-6 h-6" /> Current Weather
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <p className="text-sky-100 text-sm">Temperature</p>
+                                <p className="text-4xl font-bold">{weather.temperature}°C</p>
+                                <p className="text-sky-100 text-sm">Feels like {weather.feels_like}°C</p>
+                            </div>
+                            <div>
+                                <p className="text-sky-100 text-sm">Condition</p>
+                                <p className="text-2xl font-semibold capitalize">{weather.condition}</p>
+                                <p className="text-sky-100 text-sm">{weather.description}</p>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <Droplets className="w-5 h-5" />
+                                    <span className="text-sky-100">Humidity: {weather.humidity}%</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Wind className="w-5 h-5" />
+                                    <span className="text-sky-100">Wind: {weather.wind_speed} m/s</span>
+                                </div>
+                                {weather.is_demo && (
+                                    <p className="text-sky-100 text-xs italic mt-3">Demo weather data</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 )}
 
                 {/* Overview Section */}

@@ -42,6 +42,14 @@ class Destination extends Model
     }
 
     /**
+     * Get the favorites for this destination.
+     */
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    /**
      * Get the average rating of the destination.
      */
     public function averageRating(): float

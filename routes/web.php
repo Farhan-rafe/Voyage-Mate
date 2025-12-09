@@ -7,6 +7,8 @@ use App\Http\Controllers\ChecklistItemController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\WeatherController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -20,9 +22,13 @@ Route::get('/', function () {
 })->name('home');
 
 
-// Destination search and details
-Route::get('/destinations', [\App\Http\Controllers\DestinationController::class, 'index'])->name('destinations.index');
-Route::get('/destinations/{id}', [\App\Http\Controllers\DestinationController::class, 'show'])->name('destinations.show');
+// Destination search and details (public routes)
+Route::get('/destinations', [DestinationController::class, 'index'])->name('destinations.index');
+Route::get('/destinations/{id}', [DestinationController::class, 'show'])->name('destinations.show');
+
+// Weather API (public)
+Route::get('/api/weather/{destination}', [WeatherController::class, 'getWeather'])->name('weather.get');
+Route::get('/api/weather-location', [WeatherController::class, 'getWeatherByLocation'])->name('weather.location');
 
 // Reviews (only for authenticated users)
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -68,6 +74,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Reviews for destinations
     Route::post('/destinations/{destination}/reviews', [ReviewController::class, 'store'])
         ->name('reviews.store');
+
+    // Favorites for destinations
+    Route::post('/destinations/{destination}/favorite', [FavoriteController::class, 'toggle'])
+        ->name('favorites.toggle');
+    Route::get('/favorites/check/{destination}', [FavoriteController::class, 'isFavorited'])
+        ->name('favorites.check');
+    Route::get('/favorites', [FavoriteController::class, 'list'])
+        ->name('favorites.list');
 });
 
 require __DIR__.'/settings.php';
