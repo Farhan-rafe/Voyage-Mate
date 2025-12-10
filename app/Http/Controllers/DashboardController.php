@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trip;
+use App\Models\Favorite;
 use App\Models\Expense;
 use App\Models\ItineraryItem;
 use Illuminate\Http\Request;
@@ -103,6 +104,11 @@ class DashboardController extends Controller
             })
             ->values();
 
+        /* ---------------------------------------------
+            FAVORITES COUNT
+        --------------------------------------------- */
+        $favoritesCount = Favorite::where('user_id', $userId)->count();
+
 
         /* ---------------------------------------------
             RETURN TO DASHBOARD COMPONENT
@@ -113,7 +119,7 @@ class DashboardController extends Controller
                 'totalTrips'             => $totalTrips,
                 'upcomingTrip'           => $upcomingTripData,
                 'usedBudgetPercent'      => $usedBudgetPercent,
-                'favoritesCount'         => 0, // Future-proofing
+                'favoritesCount'         => $favoritesCount,
                 'upcomingThisMonthCount' => $upcomingThisMonthCount,
                 'todayItineraryItems'    => $todayItineraryItems,  // ⬅ NOW INCLUDED
             ],
