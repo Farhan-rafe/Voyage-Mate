@@ -1,5 +1,6 @@
 import React from "react";
 import { Head, useForm, usePage, router } from "@inertiajs/react";
+import CurrencyConverter from "@/components/CurrencyConverter";
 
 /* -------------------------------------------------
    TYPES
@@ -494,6 +495,16 @@ export default function Show() {
             <h2 className="text-xl font-semibold mb-3 text-blue-700">
               Budget & Expenses
             </h2>
+            <details className="mt-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm">
+              <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+                Currency Converter
+              </summary>
+
+              <div className="mt-4">
+                <CurrencyConverter />
+              </div>
+            </details>
+
 
             {budget === null ? (
               <p className="text-sm text-slate-800">

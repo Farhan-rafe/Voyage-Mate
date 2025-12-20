@@ -1,5 +1,6 @@
 import React from "react";
 import { Head, useForm, usePage, router } from "@inertiajs/react";
+import CurrencyConverter from "@/components/CurrencyConverter";
 
 interface TripFormData {
   title: string;
@@ -7,6 +8,7 @@ interface TripFormData {
   start_date: string;
   end_date: string;
   description: string;
+  notes: string
   budget: string;
 }
 
@@ -17,6 +19,7 @@ interface PrefillProps {
     start_date?: string;
     end_date?: string;
     description?: string;
+    notes?: string;
     budget?: number | string;
   };
   [key: string]: any;
@@ -32,6 +35,7 @@ export default function Create() {
     start_date: prefill?.start_date ?? "",
     end_date: prefill?.end_date ?? "",
     description: prefill?.description ?? "",
+    notes: prefill?.notes ?? "",
     budget:
       prefill?.budget !== undefined && prefill?.budget !== null
         ? String(prefill.budget)
@@ -202,6 +206,15 @@ export default function Create() {
                     {errors.budget}
                   </p>
                 )}
+                <details className="mt-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm">
+                  <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+                    Currency Converter
+                  </summary>
+
+                  <div className="mt-4">
+                    <CurrencyConverter />
+                  </div>
+                </details>
               </div>
 
               {/* Description */}
@@ -211,8 +224,8 @@ export default function Create() {
                 </label>
                 <textarea
                   className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none ring-sky-100 transition focus:border-sky-400 focus:ring-2"
-                  rows={4}
-                  placeholder="Add notes, ideas, or key plans you don't want to forget."
+                  rows={8}
+                  placeholder="Add ideas, or key plans for the trip."
                   value={data.description}
                   onChange={(e) => setData("description", e.target.value)}
                 />
@@ -221,7 +234,21 @@ export default function Create() {
                     {errors.description}
                   </p>
                 )}
+              
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  Notes (optional)
+                </label>
+                <textarea
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none ring-sky-100 transition focus:border-sky-400 focus:ring-2"
+                  rows={5}
+                  placeholder="Add notes you don't want to forget."
+                  value={data.notes}
+                  onChange={(e) => setData("notes", e.target.value)}
+                />
               </div>
+              </div>
+
             </div>
 
             {/* Footer buttons */}

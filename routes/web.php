@@ -12,6 +12,7 @@ use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\WeatherController;
+use App\Http\Controllers\CurrencyConverterController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -37,6 +38,10 @@ use App\Http\Controllers\SharedTripCommentController;
 Route::post('/s/{token}/comments', [SharedTripCommentController::class, 'store'])
     ->middleware('throttle:20,1')
     ->name('share.comments.store');
+    
+//currency
+Route::post('/currency/convert', [CurrencyConverterController::class, 'convert'])
+    ->middleware('auth');
 
 // Reviews (only for authenticated users)
 Route::middleware(['auth', 'verified'])->group(function () {
