@@ -7,6 +7,7 @@ use App\Http\Controllers\ChecklistItemController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SharedTripController;
 use App\Http\Controllers\TripShareLinkController;
+use App\Http\Controllers\SharedTripCommentController;
 use App\Http\Controllers\TripJournalEntryController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\ReviewController;
@@ -33,12 +34,17 @@ Route::get('/destinations/{id}', [DestinationController::class, 'show'])->name('
 // Weather API (public)
 Route::get('/api/weather/{destination}', [WeatherController::class, 'getWeather'])->name('weather.get');
 Route::get('/api/weather-location', [WeatherController::class, 'getWeatherByLocation'])->name('weather.location');
-use App\Http\Controllers\SharedTripCommentController;
 
+//comment on trip
 Route::post('/s/{token}/comments', [SharedTripCommentController::class, 'store'])
     ->middleware('throttle:20,1')
     ->name('share.comments.store');
-    
+Route::put('/s/{token}/comments/{comment}', [SharedTripCommentController::class, 'update'])
+    ->name('share.comments.update');
+
+Route::delete('/s/{token}/comments/{comment}', [SharedTripCommentController::class, 'destroy'])
+    ->name('share.comments.destroy');
+
 //currency
 Route::post('/currency/convert', [CurrencyConverterController::class, 'convert'])
     ->middleware('auth');
