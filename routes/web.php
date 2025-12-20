@@ -5,6 +5,9 @@ use App\Http\Controllers\ItineraryItemController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ChecklistItemController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SharedTripController;
+use App\Http\Controllers\TripShareLinkController;
+use App\Http\Controllers\TripJournalEntryController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\FavoriteController;
@@ -21,7 +24,7 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-
+Route::get('/s/{token}', [SharedTripController::class, 'show'])->name('share.show');
 // Destination search and details (public routes)
 Route::get('/destinations', [DestinationController::class, 'index'])->name('destinations.index');
 Route::get('/destinations/{id}', [DestinationController::class, 'show'])->name('destinations.show');
@@ -29,6 +32,11 @@ Route::get('/destinations/{id}', [DestinationController::class, 'show'])->name('
 // Weather API (public)
 Route::get('/api/weather/{destination}', [WeatherController::class, 'getWeather'])->name('weather.get');
 Route::get('/api/weather-location', [WeatherController::class, 'getWeatherByLocation'])->name('weather.location');
+use App\Http\Controllers\SharedTripCommentController;
+
+Route::post('/s/{token}/comments', [SharedTripCommentController::class, 'store'])
+    ->middleware('throttle:20,1')
+    ->name('share.comments.store');
 
 // Reviews (only for authenticated users)
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -70,7 +78,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('checklist-items.toggle');
     Route::delete('/checklist-items/{item}', [ChecklistItemController::class, 'destroy'])
         ->name('checklist-items.destroy');
+    //share
+    Route::post('/trips/{trip}/share-link', [TripShareLinkController::class, 'store'])
+        ->name('trips.share-link.store');
 
+    Route::delete('/trips/{trip}/share-link', [TripShareLinkController::class, 'destroy'])
+        ->name('trips.share-link.destroy');
+    
+    //journal
+    Route::get('/trips/{trip}/journal', [TripJournalEntryController::class, 'index'])
+        ->name('trips.journal');
+
+    Route::post('/trips/{trip}/journal', [TripJournalEntryController::class, 'store']);
+    Route::put('/trips/{trip}/journal/{entry}', [TripJournalEntryController::class, 'update']);
+    Route::delete('/trips/{trip}/journal/{entry}', [TripJournalEntryController::class, 'destroy']);
+    
+    Route::post('/trips/{trip}/journal/{entry}/images', [TripJournalEntryController::class, 'uploadImages'])
+        ->name('trips.journal.images.upload');
+
+    Route::delete('/trips/{trip}/journal/{entry}/images/{image}', [TripJournalEntryController::class, 'deleteImage'])
+        ->name('trips.journal.images.delete');
+
+    Route::post('/trips/{trip}/journal/{entry}/images/reorder', [TripJournalEntryController::class, 'reorderImages'])
+        ->name('trips.journal.images.reorder');
+
+    
     // Reviews for destinations
     Route::post('/destinations/{destination}/reviews', [ReviewController::class, 'store'])
         ->name('reviews.store');

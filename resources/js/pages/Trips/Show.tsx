@@ -43,12 +43,35 @@ interface Trip {
   checklist_items: ChecklistItem[];
 }
 
+interface ShareComment {
+  id: number;
+  name: string;
+  email: string | null;
+  body: string;
+  created_at: string;
+}
+
 interface ShowPageProps {
   trip: Trip;
   totalSpent: number;
+  share?: { url: string | null };
+  shareComments?: ShareComment[];
+  journalEntries?: JournalEntry[];
+  isCompleted?: boolean;
   flash?: { success?: string };
   [key: string]: any;
 }
+
+
+interface JournalEntry {
+  id: number;
+  entry_date: string | null;
+  title: string | null;
+  body: string;
+  created_at: string;
+}
+
+
 
 /* -------------------------------------------------
    HELPERS
@@ -61,6 +84,7 @@ const formatDateOnly = (value: string | null | undefined) => {
 /* -------------------------------------------------
    BLUE MODERN MODAL COMPONENT
 --------------------------------------------------*/
+
 function BlueModal({
   open,
   title,
@@ -97,7 +121,7 @@ function BlueModal({
 --------------------------------------------------*/
 export default function Show() {
   const { props } = usePage<ShowPageProps>();
-  const { trip, totalSpent, flash } = props;
+  const { trip, totalSpent, flash, share, shareComments, journalEntries, isCompleted } = props;
 
   const tripStartDate = formatDateOnly(trip.start_date);
   const tripEndDate = formatDateOnly(trip.end_date);
@@ -167,6 +191,40 @@ export default function Show() {
     title: "",
     due_date: "",
   });
+
+  //journal
+  const journalForm = useForm({
+    entry_date: "",
+    title: "",
+    body: "",
+  });
+
+  const submitJournal = (e: React.FormEvent) => {
+    e.preventDefault();
+    journalForm.post(`/trips/${trip.id}/journal`, { preserveScroll: true });
+  };
+  
+  //share
+  const [shareOpen, setShareOpen] = React.useState(false);
+
+  const generateShareLink = () => {
+    router.post(`/trips/${trip.id}/share-link`, {}, { preserveScroll: true });
+  };
+
+  const revokeShareLink = () => {
+    router.delete(`/trips/${trip.id}/share-link`, { preserveScroll: true });
+  };
+
+  const copyShareLink = async () => {
+    if (!share?.url) return;
+    try {
+      await navigator.clipboard.writeText(share.url);
+      alert("Link copied!");
+    } catch {
+      alert("Copy failed. Please copy manually.");
+    }
+  };
+
 
   /* -------------------------------------------------
      HANDLERS
@@ -299,6 +357,7 @@ export default function Show() {
   const taskItems =
     trip.checklist_items?.filter((i) => i.type === "task") || [];
 
+  
   /* -------------------------------------------------
      RENDER
   --------------------------------------------------*/
@@ -337,6 +396,15 @@ export default function Show() {
             >
               Back to Trips
             </button>
+
+            <button
+              type="button"
+              onClick={() => setShareOpen(true)}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700"
+            >
+              Share
+            </button>
+
           </div>
         </div>
 
@@ -345,6 +413,67 @@ export default function Show() {
             {flash.success}
           </div>
         )}
+
+        <BlueModal
+          open={shareOpen}
+          title="Share Trip Plan"
+          onClose={() => setShareOpen(false)}
+        >
+          {share?.url ? (
+            <>
+              <p className="text-sm text-slate-700">
+                Anyone with this link can view your trip details (read-only).
+              </p>
+
+              <input
+                value={share.url}
+                readOnly
+                className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm text-slate-900"
+              />
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={copyShareLink}
+                  className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                  Copy Link
+                </button>
+
+                <button
+                  type="button"
+                  onClick={generateShareLink}
+                  className="flex-1 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                >
+                  Regenerate
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={revokeShareLink}
+                className="w-full rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
+              >
+                Revoke Link
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-slate-700">
+                Generate a shareable link for friends or family to view this trip.
+              </p>
+
+              <button
+                type="button"
+                onClick={generateShareLink}
+                className="w-full rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                Generate Share Link
+              </button>
+            </>
+          )}
+        </BlueModal>
+        {/* 🔼🔼🔼 SHARE MODAL ENDS HERE 🔼🔼🔼 */}
 
         {/* DESCRIPTION */}
         {trip.description && (
@@ -878,6 +1007,61 @@ export default function Show() {
             )}
           </div>
         </section>
+        {/* COMMENTS */}
+        <section className="bg-slate-100 shadow-md rounded-xl p-5 border border-blue-100">
+          <h2 className="text-xl font-semibold mb-3 text-blue-700">
+            Shared Link Comments
+          </h2>
+
+          <button
+            type="button"
+            onClick={() => router.reload({ only: ["shareComments"] })}
+            className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
+          >
+            Refresh Comments
+          </button>
+
+          {!share?.url ? (
+            <p className="text-sm text-slate-700">
+              No share link generated yet. Generate a share link to collect comments.
+            </p>
+          ) : (shareComments && shareComments.length > 0 ? (
+            <div className="space-y-3">
+              {shareComments.map((cm) => (
+                <div key={cm.id} className="p-3 border rounded-lg bg-white border-blue-100">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-semibold text-slate-900">{cm.name}</p>
+                    <p className="text-xs text-slate-500">
+                      {cm.created_at ? cm.created_at.slice(0, 19).replace("T", " ") : ""}
+                    </p>
+                  </div>
+
+                  <p className="text-sm text-slate-800 mt-2 whitespace-pre-line">
+                    {cm.body}
+                  </p>
+
+                  {cm.email && (
+                    <p className="text-xs text-slate-500 mt-2">{cm.email}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-700">
+              No comments yet.
+            </p>
+          ))}
+        </section>
+
+        {/*Journal*/}
+        <button
+          onClick={() => router.visit(`/trips/${trip.id}/journal`)}
+          className="rounded-lg bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-700"
+        >
+          Journal
+        </button>
+
+         
 
         {/* REQUIRED FIELDS NOTE */}
         <p className="text-[11px] text-slate-500 mt-2">

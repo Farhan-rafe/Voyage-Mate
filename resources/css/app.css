@@ -2,6 +2,11 @@
 
 @import "tw-animate-css";
 
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap');
+
+.ProseMirror ul { list-style: disc; padding-left: 1.5rem; }
+.ProseMirror ol { list-style: decimal; padding-left: 1.5rem; }
+
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
@@ -175,3 +180,84 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .animate-pulse-glow {
     animation: pulse-glow 2s infinite ease-in-out;
 }
+
+/* ===============================
+   Journal Image Resize Styling
+   =============================== */
+
+.ProseMirror img.journal-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  resize: both;               
+  overflow: auto;
+  cursor: nwse-resize;
+  border-radius: 8px;
+}
+
+/* Selected image outline */
+.ProseMirror-selectednode img {
+  outline: 2px solid #6366f1; /* indigo */
+}
+
+/* Prevent breaking layout */
+.ProseMirror {
+  overflow-wrap: break-word;
+}
+
+/* TipTap resizable image handles */
+.tiptap-resizable-image .resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #6366f1; /* indigo */
+  border: 2px solid #fff;
+  border-radius: 9999px;
+  z-index: 10;
+}
+
+.tiptap-resizable-image .resize-handle.tl { top: -6px; left: -6px; cursor: nwse-resize; }
+.tiptap-resizable-image .resize-handle.tr { top: -6px; right: -6px; cursor: nesw-resize; }
+.tiptap-resizable-image .resize-handle.bl { bottom: -6px; left: -6px; cursor: nesw-resize; }
+.tiptap-resizable-image .resize-handle.br { bottom: -6px; right: -6px; cursor: nwse-resize; }
+
+.ProseMirror img {
+  cursor: grab;
+}
+
+.ProseMirror img:active {
+  cursor: grabbing;
+}
+
+.tiptap-resizable-image {
+  cursor: grab;
+}
+
+.tiptap-resizable-image:active {
+  cursor: grabbing;
+}
+
+.tiptap-resizable-image {
+  cursor: grab;
+  user-select: none;
+}
+
+.tiptap-resizable-image:active {
+  cursor: grabbing;
+}
+
+/* optional: prevents the image from highlighting while dragging */
+.tiptap-resizable-image img {
+  user-select: none;
+}
+
+.tiptap-resizable-image {
+  display: inline-block;
+  vertical-align: top;
+}
+
+
+
+
+
+

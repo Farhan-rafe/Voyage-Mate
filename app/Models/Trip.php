@@ -48,4 +48,20 @@ class Trip extends Model
     {
         return $this->hasMany(ChecklistItem::class);
     }
+
+    public function shareLinks()
+    {
+        return $this->hasMany(\App\Models\TripShareLink::class);
+    }
+
+    public function activeShareLink()
+    {
+        return $this->hasOne(\App\Models\TripShareLink::class)->active()->latestOfMany();
+    }
+
+    public function journalEntries()
+    {
+        return $this->hasMany(\App\Models\TripJournalEntry::class)->latest();
+    }
+    
 }

@@ -56,11 +56,28 @@ class TripController extends Controller
     {
         abort_unless($trip->user_id === Auth::id(), 403);
 
-        $trip->load(['itineraryItems', 'expenses', 'checklistItems']);
+        $trip->load(['itineraryItems', 'expenses', 'checklistItems', 'activeShareLink', 'journalEntries']);
+
+        $active = $trip->activeShareLink;
+
+        $comments = [];
+        if ($active) {
+            $comments = $active->comments()->latest()->get();
+        }
 
         return Inertia::render('Trips/Show', [
             'trip'       => $trip,
             'totalSpent' => $trip->expenses->sum('amount'),
+
+            'share'      => [
+                'url' => $active ? route('share.show', $active->token) : null,
+            ],
+
+            'shareComments' => $comments,
+            'journalEntries' => $trip->journalEntries,
+            'isCompleted' => $trip->end_date ? $trip->end_date->endOfDay()->lte(now()) : false,
+
+            'flash' => session('success') ? ['success' => session('success')] : null,
         ]);
     }
 
