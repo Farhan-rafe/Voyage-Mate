@@ -56,7 +56,7 @@ class TripController extends Controller
     {
         abort_unless($trip->user_id === Auth::id(), 403);
 
-        $trip->load(['itineraryItems', 'expenses', 'checklistItems', 'activeShareLink', 'journalEntries']);
+        $trip->load(['itineraryItems', 'expenses', 'checklistItems', 'accommodations', 'transports', 'activeShareLink', 'journalEntries']);
 
         $active = $trip->activeShareLink;
 
