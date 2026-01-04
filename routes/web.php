@@ -14,6 +14,8 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\CurrencyConverterController;
+use App\Http\Controllers\AccommodationController;
+use App\Http\Controllers\TransportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -89,6 +91,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('checklist-items.toggle');
     Route::delete('/checklist-items/{item}', [ChecklistItemController::class, 'destroy'])
         ->name('checklist-items.destroy');
+
+    // Accommodations
+    Route::post('/trips/{trip}/accommodations', [AccommodationController::class, 'store'])
+        ->name('accommodations.store');
+    Route::patch('/accommodations/{accommodation}', [AccommodationController::class, 'update'])
+        ->name('accommodations.update');
+    Route::delete('/accommodations/{accommodation}', [AccommodationController::class, 'destroy'])
+        ->name('accommodations.destroy');
+
+    // Transport
+    Route::post('/trips/{trip}/transports', [TransportController::class, 'store'])
+        ->name('transports.store');
+    Route::patch('/transports/{transport}', [TransportController::class, 'update'])
+        ->name('transports.update');
+    Route::delete('/transports/{transport}', [TransportController::class, 'destroy'])
+        ->name('transports.destroy');
     //share
     Route::post('/trips/{trip}/share-link', [TripShareLinkController::class, 'store'])
         ->name('trips.share-link.store');

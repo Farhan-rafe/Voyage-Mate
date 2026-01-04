@@ -8,6 +8,8 @@ use App\Models\ItineraryItem;
 use App\Models\Expense;
 use App\Models\ChecklistItem;
 use App\Models\User;
+use App\Models\Accommodation;
+use App\Models\Transport;
 
 class Trip extends Model
 {
@@ -47,6 +49,16 @@ class Trip extends Model
     public function checklistItems()
     {
         return $this->hasMany(ChecklistItem::class);
+    }
+
+    public function accommodations()
+    {
+        return $this->hasMany(Accommodation::class)->orderBy('check_in_date');
+    }
+
+    public function transports()
+    {
+        return $this->hasMany(Transport::class)->orderBy('departure_time');
     }
 
     public function shareLinks()
