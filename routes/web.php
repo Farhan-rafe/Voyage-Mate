@@ -14,6 +14,9 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\CurrencyConverterController;
+use App\Http\Controllers\AccommodationController;
+use App\Http\Controllers\TransportController;
+
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -27,6 +30,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/s/{token}', [SharedTripController::class, 'show'])->name('share.show');
+
 // Destination search and details (public routes)
 Route::get('/destinations', [DestinationController::class, 'index'])->name('destinations.index');
 Route::get('/destinations/{id}', [DestinationController::class, 'show'])->name('destinations.show');
@@ -34,34 +38,30 @@ Route::get('/destinations/{id}', [DestinationController::class, 'show'])->name('
 // Weather API (public)
 Route::get('/api/weather/{destination}', [WeatherController::class, 'getWeather'])->name('weather.get');
 Route::get('/api/weather-location', [WeatherController::class, 'getWeatherByLocation'])->name('weather.location');
+Route::get('/api/weather/trip/{trip}', [WeatherController::class, 'getTripWeather'])->name('weather.trip');
 
-//comment on trip
+// Comment on shared trip
 Route::post('/s/{token}/comments', [SharedTripCommentController::class, 'store'])
     ->middleware('throttle:20,1')
     ->name('share.comments.store');
+
 Route::put('/s/{token}/comments/{comment}', [SharedTripCommentController::class, 'update'])
     ->name('share.comments.update');
 
 Route::delete('/s/{token}/comments/{comment}', [SharedTripCommentController::class, 'destroy'])
     ->name('share.comments.destroy');
 
-//currency
+// Currency
 Route::post('/currency/convert', [CurrencyConverterController::class, 'convert'])
     ->middleware('auth');
 
-// Reviews (only for authenticated users)
+// Authenticated & verified users
 Route::middleware(['auth', 'verified'])->group(function () {
+
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
-    Route::get('/trips', [TripController::class, 'index'])->name('trips.index');
-    Route::get('/trips/create', [TripController::class, 'create'])->name('trips.create');
-    Route::post('/trips', [TripController::class, 'store'])->name('trips.store');
-    Route::get('/trips/{trip}', [TripController::class, 'show'])->name('trips.show');
-    Route::delete('/trips/{trip}', [TripController::class, 'destroy'])->name('trips.destroy');
     Route::resource('trips', TripController::class);
-    Route::get('/trips/{trip}/edit', [TripController::class, 'edit'])->name('trips.edit');
-    Route::put('/trips/{trip}', [TripController::class, 'update'])->name('trips.update');
-    
+
     // Itinerary
     Route::post('/trips/{trip}/itinerary-items', [ItineraryItemController::class, 'store'])
         ->name('itinerary-items.store');
@@ -89,36 +89,48 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('checklist-items.toggle');
     Route::delete('/checklist-items/{item}', [ChecklistItemController::class, 'destroy'])
         ->name('checklist-items.destroy');
-    //share
+
+    // Accommodations
+    Route::post('/trips/{trip}/accommodations', [AccommodationController::class, 'store'])
+        ->name('accommodations.store');
+    Route::patch('/accommodations/{accommodation}', [AccommodationController::class, 'update'])
+        ->name('accommodations.update');
+    Route::delete('/accommodations/{accommodation}', [AccommodationController::class, 'destroy'])
+        ->name('accommodations.destroy');
+
+    // Transport
+    Route::post('/trips/{trip}/transports', [TransportController::class, 'store'])
+        ->name('transports.store');
+    Route::patch('/transports/{transport}', [TransportController::class, 'update'])
+        ->name('transports.update');
+    Route::delete('/transports/{transport}', [TransportController::class, 'destroy'])
+        ->name('transports.destroy');
+
+    // Share trip
     Route::post('/trips/{trip}/share-link', [TripShareLinkController::class, 'store'])
         ->name('trips.share-link.store');
-
     Route::delete('/trips/{trip}/share-link', [TripShareLinkController::class, 'destroy'])
         ->name('trips.share-link.destroy');
-    
-    //journal
+
+    // Journal
     Route::get('/trips/{trip}/journal', [TripJournalEntryController::class, 'index'])
         ->name('trips.journal');
-
     Route::post('/trips/{trip}/journal', [TripJournalEntryController::class, 'store']);
     Route::put('/trips/{trip}/journal/{entry}', [TripJournalEntryController::class, 'update']);
     Route::delete('/trips/{trip}/journal/{entry}', [TripJournalEntryController::class, 'destroy']);
-    
+
     Route::post('/trips/{trip}/journal/{entry}/images', [TripJournalEntryController::class, 'uploadImages'])
         ->name('trips.journal.images.upload');
-
     Route::delete('/trips/{trip}/journal/{entry}/images/{image}', [TripJournalEntryController::class, 'deleteImage'])
         ->name('trips.journal.images.delete');
-
     Route::post('/trips/{trip}/journal/{entry}/images/reorder', [TripJournalEntryController::class, 'reorderImages'])
         ->name('trips.journal.images.reorder');
 
-    
-    // Reviews for destinations
+    // Reviews
     Route::post('/destinations/{destination}/reviews', [ReviewController::class, 'store'])
         ->name('reviews.store');
 
-    // Favorites for destinations
+    // Favorites
     Route::post('/destinations/{destination}/favorite', [FavoriteController::class, 'toggle'])
         ->name('favorites.toggle');
     Route::get('/favorites/check/{destination}', [FavoriteController::class, 'isFavorited'])
@@ -127,4 +139,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('favorites.list');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
