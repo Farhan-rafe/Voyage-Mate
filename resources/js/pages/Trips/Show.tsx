@@ -343,6 +343,42 @@ export default function Show() {
     }
   };
 
+  // Weather state
+  const [weatherData, setWeatherData] = React.useState<any>(null);
+  const [weatherLoading, setWeatherLoading] = React.useState(false);
+  const [weatherError, setWeatherError] = React.useState<string | null>(null);
+
+  const fetchWeather = async () => {
+    if (!trip.destination) {
+      setWeatherError("No destination set for this trip");
+      return;
+    }
+
+    setWeatherLoading(true);
+    setWeatherError(null);
+
+    try {
+      const response = await fetch(`/api/weather/trip/${trip.id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch weather");
+      }
+      const data = await response.json();
+      setWeatherData(data);
+    } catch (error) {
+      setWeatherError("Unable to load weather data");
+      console.error("Weather fetch error:", error);
+    } finally {
+      setWeatherLoading(false);
+    }
+  };
+
+  // Fetch weather when destination changes
+  React.useEffect(() => {
+    if (trip.destination) {
+      fetchWeather();
+    }
+  }, [trip.destination]);
+
 
   /* -------------------------------------------------
      HANDLERS
@@ -719,6 +755,187 @@ export default function Show() {
               {trip.description}
             </p>
           </div>
+        )}
+
+        {/* ----------------------------- */}
+        {/*  WEATHER FORECAST SECTION    */}
+        {/* ----------------------------- */}
+        {trip.destination && (
+          <section className="bg-gradient-to-br from-blue-50 to-slate-100 border border-blue-100 shadow-md rounded-xl p-5 mt-2">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-semibold text-blue-700 flex items-center gap-2">
+                <span>🌤️</span> Weather Forecast
+              </h2>
+              <button
+                onClick={fetchWeather}
+                disabled={weatherLoading}
+                className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
+              >
+                {weatherLoading ? "Loading..." : "Refresh"}
+              </button>
+            </div>
+
+            {weatherLoading && !weatherData ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="text-sm text-slate-600 mt-2">Loading weather data...</p>
+              </div>
+            ) : weatherError ? (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                <p className="text-sm text-red-700">{weatherError}</p>
+              </div>
+            ) : weatherData?.weather ? (
+              <div className="space-y-4">
+                {/* Main Weather Card */}
+                <div className="bg-white rounded-lg p-5 shadow border border-blue-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-2xl font-bold text-blue-900">
+                        {weatherData.weather.temperature}°C
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        Feels like {weatherData.weather.feels_like}°C
+                      </p>
+                      <p className="text-lg font-semibold text-blue-700 mt-1">
+                        {weatherData.weather.description}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        📍 {weatherData.weather.location}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-5xl mb-2">
+                        {weatherData.weather.condition === "Clear" && "☀️"}
+                        {weatherData.weather.condition === "Clouds" && "☁️"}
+                        {weatherData.weather.condition === "Rain" && "🌧️"}
+                        {weatherData.weather.condition === "Snow" && "❄️"}
+                        {weatherData.weather.condition === "Thunderstorm" && "⛈️"}
+                        {!["Clear", "Clouds", "Rain", "Snow", "Thunderstorm"].includes(weatherData.weather.condition) && "🌤️"}
+                      </div>
+                      {weatherData.weather.is_demo && (
+                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                          Demo Data
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Temperature Range */}
+                  <div className="mt-4 pt-4 border-t border-blue-100">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-blue-50 rounded-lg p-3">
+                        <p className="text-xs text-slate-600">High</p>
+                        <p className="text-lg font-semibold text-blue-800">
+                          {weatherData.weather.temp_max}°C
+                        </p>
+                      </div>
+                      <div className="bg-blue-50 rounded-lg p-3">
+                        <p className="text-xs text-slate-600">Low</p>
+                        <p className="text-lg font-semibold text-blue-800">
+                          {weatherData.weather.temp_min}°C
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Weather Details Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="bg-white rounded-lg p-4 shadow border border-blue-100">
+                    <p className="text-xs text-slate-600 mb-1">💧 Humidity</p>
+                    <p className="text-lg font-semibold text-blue-900">
+                      {weatherData.weather.humidity}%
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 shadow border border-blue-100">
+                    <p className="text-xs text-slate-600 mb-1">💨 Wind Speed</p>
+                    <p className="text-lg font-semibold text-blue-900">
+                      {weatherData.weather.wind_speed} m/s
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 shadow border border-blue-100">
+                    <p className="text-xs text-slate-600 mb-1">🌫️ Visibility</p>
+                    <p className="text-lg font-semibold text-blue-900">
+                      {weatherData.weather.visibility} km
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 shadow border border-blue-100">
+                    <p className="text-xs text-slate-600 mb-1">☁️ Clouds</p>
+                    <p className="text-lg font-semibold text-blue-900">
+                      {weatherData.weather.clouds}%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Trip Dates Info */}
+                {(weatherData.trip_dates?.start || weatherData.trip_dates?.end) && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-xs font-semibold text-blue-700 mb-2">
+                      📅 Your Trip Duration
+                    </p>
+                    <div className="flex gap-4 text-sm">
+                      {weatherData.trip_dates.start && (
+                        <div>
+                          <span className="text-slate-600">Check-in: </span>
+                          <span className="font-medium text-blue-900">
+                            {new Date(weatherData.trip_dates.start).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                      {weatherData.trip_dates.end && (
+                        <div>
+                          <span className="text-slate-600">Check-out: </span>
+                          <span className="font-medium text-blue-900">
+                            {new Date(weatherData.trip_dates.end).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-600 mt-2">
+                      💡 Plan your activities based on the weather conditions shown above
+                    </p>
+                  </div>
+                )}
+
+                {/* Weather Tips */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-xs font-semibold text-blue-700 mb-2">
+                    ✨ Weather Tips
+                  </p>
+                  <ul className="text-xs text-slate-700 space-y-1">
+                    {weatherData.weather.temperature > 30 && (
+                      <li>• High temperature expected - Stay hydrated and use sun protection</li>
+                    )}
+                    {weatherData.weather.temperature < 10 && (
+                      <li>• Low temperature expected - Pack warm clothing</li>
+                    )}
+                    {weatherData.weather.condition === "Rain" && (
+                      <li>• Rain expected - Don't forget your umbrella and waterproof gear</li>
+                    )}
+                    {weatherData.weather.humidity > 70 && (
+                      <li>• High humidity - Light, breathable clothing recommended</li>
+                    )}
+                    {weatherData.weather.wind_speed > 10 && (
+                      <li>• Windy conditions - Secure loose items and consider indoor activities</li>
+                    )}
+                    {weatherData.weather.condition === "Clear" && weatherData.weather.temperature > 20 && weatherData.weather.temperature < 30 && (
+                      <li>• Perfect weather conditions for outdoor activities!</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <p className="text-sm text-slate-600">
+                  Weather data will appear here once loaded
+                </p>
+              </div>
+            )}
+          </section>
         )}
 
         {/* ----------------------------- */}

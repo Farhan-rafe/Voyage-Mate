@@ -36,6 +36,7 @@ Route::get('/destinations/{id}', [DestinationController::class, 'show'])->name('
 // Weather API (public)
 Route::get('/api/weather/{destination}', [WeatherController::class, 'getWeather'])->name('weather.get');
 Route::get('/api/weather-location', [WeatherController::class, 'getWeatherByLocation'])->name('weather.location');
+Route::get('/api/weather/trip/{trip}', [WeatherController::class, 'getTripWeather'])->name('weather.trip');
 
 //comment on trip
 Route::post('/s/{token}/comments', [SharedTripCommentController::class, 'store'])
